@@ -15,6 +15,6 @@ export default defineNuxtConfig({
       ]
     }
   },
-  ssr: false,
+  ssr: true,
   css: ['@/assets/css/bs-theme-overrides.css', '@/assets/css/Navbar-Centered-Brand-Dark-icons.css']
 })
