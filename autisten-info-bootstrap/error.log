@@ -1,0 +1,65 @@
+----------
+
+Tue Jun 25 2024 16:35:46 GMT+0200 (Mitteleuropäische Sommerzeit)
+
+C:\Users\diego\OneDrive\Kunden\Autisten.info\AutistenInfoNuxt\BootstrapToNuxt\index.js:149
+    if (fs.existsync(exportdir)) {
+                     ^
+
+ReferenceError: exportdir is not defined
+    at main (C:\Users\diego\OneDrive\Kunden\Autisten.info\AutistenInfoNuxt\BootstrapToNuxt\index.js:149:22)
+    at Object.<anonymous> (C:\Users\diego\OneDrive\Kunden\Autisten.info\AutistenInfoNuxt\BootstrapToNuxt\index.js:157:1)
+    at Module._compile (node:internal/modules/cjs/loader:1159:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1213:10)
+    at Module.load (node:internal/modules/cjs/loader:1037:32)
+    at Module._load (node:internal/modules/cjs/loader:878:12)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:81:12)
+    at node:internal/main/run_main_module:23:47
+
+Node.js v18.12.1
+
+
+----------
+
+Tue Jun 25 2024 16:36:35 GMT+0200 (Mitteleuropäische Sommerzeit)
+
+C:\Users\diego\OneDrive\Kunden\Autisten.info\AutistenInfoNuxt\BootstrapToNuxt\index.js:149
+    if (fs.existsync(exportDir)) {
+           ^
+
+TypeError: fs.existsync is not a function
+    at main (C:\Users\diego\OneDrive\Kunden\Autisten.info\AutistenInfoNuxt\BootstrapToNuxt\index.js:149:12)
+    at Object.<anonymous> (C:\Users\diego\OneDrive\Kunden\Autisten.info\AutistenInfoNuxt\BootstrapToNuxt\index.js:157:1)
+    at Module._compile (node:internal/modules/cjs/loader:1159:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1213:10)
+    at Module.load (node:internal/modules/cjs/loader:1037:32)
+    at Module._load (node:internal/modules/cjs/loader:878:12)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:81:12)
+    at node:internal/main/run_main_module:23:47
+
+Node.js v18.12.1
+
+
+----------
+
+Tue Jun 25 2024 18:04:33 GMT+0200 (Mitteleuropäische Sommerzeit)
+
+C:\Users\diego\OneDrive\Kunden\Autisten.info\AutistenInfoNuxt\BootstrapToNuxt\index.js:113
+        placeholderMap.forEach((customName, placeholder) => {
+        ^
+
+ReferenceError: placeholderMap is not defined
+    at renameHtmlComponents (C:\Users\diego\OneDrive\Kunden\Autisten.info\AutistenInfoNuxt\BootstrapToNuxt\index.js:113:9)
+    at C:\Users\diego\OneDrive\Kunden\Autisten.info\AutistenInfoNuxt\BootstrapToNuxt\index.js:53:27
+    at Array.forEach (<anonymous>)
+    at extractVueComponents (C:\Users\diego\OneDrive\Kunden\Autisten.info\AutistenInfoNuxt\BootstrapToNuxt\index.js:47:29)
+    at main (C:\Users\diego\OneDrive\Kunden\Autisten.info\AutistenInfoNuxt\BootstrapToNuxt\index.js:143:9)
+    at Object.<anonymous> (C:\Users\diego\OneDrive\Kunden\Autisten.info\AutistenInfoNuxt\BootstrapToNuxt\index.js:150:1)
+    at Module._compile (node:internal/modules/cjs/loader:1159:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1213:10)
+    at Module.load (node:internal/modules/cjs/loader:1037:32)
+    at Module._load (node:internal/modules/cjs/loader:878:12)
+
+Node.js v18.12.1
+
+

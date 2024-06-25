@@ -25,17 +25,21 @@
         </div>
     </nav><!-- End: AppNavbar.vue -->
     <main>
+        <!-- Start: AppBlogPostList.vue -->
         <div class="container">
-            <div class="row">
-                <div class="col">
-                    <!-- Start: content/herobanner.vue -->
-                    <div class="text-center border rounded p-4 p-lg-5" style="background: linear-gradient(0deg, var(--bs-body-bg) 13%, rgba(255,255,255,0.25)), url(&quot;https://picsum.photos/600/300&quot;) center / cover;">
-                        <p class="fw-bold text-primary mb-2"><slot name="description"/></p>
-                        <h1 class="fw-bold mb-4"><slot /></h1><button class="btn btn-primary fs-5 me-2 py-2 px-4" type="button">Button</button><button class="btn btn-light fs-5 py-2 px-4" type="button">Button</button>
-                    </div><!-- End: content/herobanner.vue -->
+            <div nuxt:name="ContentList" path="/blog" v-slot="{ list }">
+                <div class="row gy-3 py-5">
+                    <div class="col-xxl-4" v-for="article in list" :key="article._path">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title">{{article.title}}</h4>
+                                <p class="card-text">{{article.description}}</p><button class="btn btn-primary" type="button"><a nuxt:name="nuxt-link" :to="article._path">Read More</a></button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </div><!-- End: AppBlogPostList.vue -->
     </main><!-- Start: AppFooter.vue -->
     <footer class="text-white bg-primary">
         <div class="container py-4 py-lg-5">
