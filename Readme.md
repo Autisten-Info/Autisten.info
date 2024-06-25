@@ -15,4 +15,3 @@ If you find a bug or have a feature request, please open an issue here on Github
 
 ## License
 This project is Copyright (C) Autisten Informieren. All Rights Reserved. 
-```
