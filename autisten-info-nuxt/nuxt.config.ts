@@ -1,4 +1,5 @@
 export default defineNuxtConfig({
+  modules: ["@nuxt/content"],
   app: {
     head: {
       link: [
@@ -15,6 +16,7 @@ export default defineNuxtConfig({
       ]
     }
   },
+
   ssr: true,
   css: ['@/assets/css/bs-theme-overrides.css', '@/assets/css/Navbar-Centered-Brand-Dark-icons.css']
 })

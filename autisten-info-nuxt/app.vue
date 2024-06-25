@@ -2,7 +2,7 @@
   <div>
     <AppNavbar />
     <main>
-
+      <NuxtPage />
     </main>
     <AppFooter />
   </div>
