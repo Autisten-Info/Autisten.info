@@ -1,5 +1,5 @@
 export default defineNuxtConfig({
-  modules: ["@nuxt/content", "@nuxthq/studio"],
+  modules: ["@nuxt/content", "@nuxthq/studio", "@nuxt/image"],
   app: {
     head: {
       link: [
@@ -18,5 +18,5 @@ export default defineNuxtConfig({
   },
 
   ssr: true,
-  css: ['@/assets/css/bs-theme-overrides.css', '@/assets/css/Navbar-Centered-Brand-Dark-icons.css']
+  css: ['@/assets/css/bs-theme-overrides.css', '@/assets/css/Navbar-Centered-Brand-Dark-icons.css', '@/assets/css/styles.compiled.css']
 })

@@ -7,9 +7,12 @@ const exportDir = process.argv[2];
 
 // Pfad zum Quelldateiordner und zum Zielverzeichnis
 const sourceDir = path.join(__dirname, 'autisten-info-bootstrap', 'assets');
+const exportCssDir = path.join(exportDir, 'assets', 'css');
 const destDir = path.join(exportDir, '..', 'autisten-info-nuxt', 'assets');
 const nuxtConfigPath = path.join(exportDir, '..', 'autisten-info-nuxt', 'nuxt.config.ts');
 const componentsDir = path.join(exportDir, '..', 'autisten-info-nuxt', 'components');
+
+let usedAssets = [];
 
 // Funktion zum Kopieren des Ordners
 function copyFolderSync(from, to) {
@@ -28,17 +31,13 @@ function copyFolderSync(from, to) {
 }
 
 // Funktion zum Überschreiben der CSS-Konfiguration in nuxt.config.ts
-function updateNuxtConfig(configPath) {
-    const cssDir = path.join(exportDir, '..', 'autisten-info-nuxt', 'assets', 'css');
-    const cssFiles = fs.readdirSync(cssDir).filter(file => file.endsWith('.css')).map(file => `@/assets/css/${file}`);
-    
+function updateNuxtConfig(configPath, additionalCssFiles) {
     let configContent = fs.readFileSync(configPath, 'utf8');
-
-    const cssSection = `css: [${cssFiles.map(file => `'${file}'`).join(', ')}]`;
+    const cssSection = `css: [${additionalCssFiles.map(file => `'${file}'`).join(', ')}]`;
     configContent = configContent.replace(/css: \[.*?\]/s, cssSection);
 
     fs.writeFileSync(configPath, configContent, 'utf8');
-    console.log(`Updated nuxt.config.ts with CSS files: ${cssFiles.join(', ')}`);
+    console.log(`Updated nuxt.config.ts with CSS files: ${additionalCssFiles.join(', ')}`);
 }
 
 // Funktion zum Umbenennen von DOM-Tags mit nuxt:name Attribut
@@ -76,8 +75,34 @@ function renameNuxtTags(htmlContent) {
     return $.html();
 }
 
+// Funktion zum Einbetten von CSS in die Vue-Komponente
+function embedCssInComponent(componentPath, cssContent, cssFilePath) {
+    let componentContent = '';
+    if (fs.existsSync(componentPath)) {
+        componentContent = fs.readFileSync(componentPath, 'utf8');
+    } else {
+        fs.mkdirSync(path.dirname(componentPath), { recursive: true });
+        componentContent = `<template></template>`;
+    }
+
+    const $ = cheerio.load(componentContent, { xmlMode: true, decodeEntities: false });
+
+    const styleTag = `<style scoped>\n${cssContent}\n</style>`;
+    if ($('style[scoped]').length > 0) {
+        $('style[scoped]').replaceWith(styleTag);
+    } else {
+        $('template').after(styleTag);
+    }
+
+    fs.writeFileSync(componentPath, $.html(), 'utf8');
+    console.log(`Embedded CSS into component: ${componentPath}`);
+    usedAssets.push(cssFilePath);
+}
+
+// Funktion zum Extrahieren von Vue-Komponenten aus HTML-Dateien
 // Funktion zum Extrahieren von Vue-Komponenten aus HTML-Dateien
 function extractVueComponents(htmlDir, targetDir) {
+    console.log(`Extracting Vue components from HTML files in ${htmlDir} to ${targetDir}`);
     fs.readdirSync(htmlDir).forEach(file => {
         if (file.endsWith('.html')) {
             const filePath = path.join(htmlDir, file);
@@ -100,24 +125,58 @@ function extractVueComponents(htmlDir, targetDir) {
                     const fullComponentPath = path.join(targetDir, componentPath);
                     fs.mkdirSync(path.dirname(fullComponentPath), { recursive: true });
 
-                    if (fs.existsSync(fullComponentPath)) {
-                        // Datei existiert, <template> Inhalt überschreiben
-                        let existingContent = fs.readFileSync(fullComponentPath, 'utf8');
-                        const templateRegex = /<template>[\s\S]*?<\/template>/;
+                    // Überprüfen und Einfügen des passenden CSS
+                    const cssPath = path.join(exportCssDir, componentPath.replace('.vue', '.css'));
+                    const scssCompiledPath = path.join(exportCssDir, componentPath.replace('.vue', '.compiled.css'));
 
-                        if (templateRegex.test(existingContent)) {
-                            existingContent = existingContent.replace(templateRegex, `<template>\n${componentContent}\n</template>`);
-                            fs.writeFileSync(fullComponentPath, existingContent, 'utf8');
-                            console.log(`Updated existing component: ${fullComponentPath}`);
+                    console.log(`Checking CSS files: ${cssPath}, ${scssCompiledPath}`);
+
+                    let cssContent = '';
+                    let usedCssPath = '';
+
+                    if (fs.existsSync(cssPath)) {
+                        cssContent = fs.readFileSync(cssPath, 'utf8');
+                        usedCssPath = cssPath;
+                    } else if (fs.existsSync(scssCompiledPath)) {
+                        cssContent = fs.readFileSync(scssCompiledPath, 'utf8');
+                        usedCssPath = scssCompiledPath;
+                    }
+
+                    if (fs.existsSync(fullComponentPath)) {
+                        // Datei existiert, <template> und <style scoped> Inhalt überschreiben
+                        let existingContent = fs.readFileSync(fullComponentPath, 'utf8');
+                        const $ = cheerio.load(existingContent, { xmlMode: true, decodeEntities: false });
+
+                        // Template ersetzen
+                        if ($('template').length > 0) {
+                            $('template').html(`\n${componentContent}\n`);
                         } else {
-                            existingContent = `<template>\n${componentContent}\n</template>\n` + existingContent;
-                            fs.writeFileSync(fullComponentPath, existingContent, 'utf8');
-                            console.log(`Added template to existing component: ${fullComponentPath}`);
+                            $('body').append(`<template>\n${componentContent}\n</template>`);
                         }
+
+                        // Style scoped ersetzen oder hinzufügen
+                        const styleTag = `<style scoped>\n${cssContent}\n</style>`;
+                        if ($('style[scoped]').length > 0) {
+                            $('style[scoped]').replaceWith(styleTag);
+                        } else if (cssContent) {
+                            $('template').after(styleTag);
+                        }
+
+                        fs.writeFileSync(fullComponentPath, $.html(), 'utf8');
+                        console.log(`Updated existing component: ${fullComponentPath}`);
                     } else {
                         // Datei existiert nicht, neue Datei erstellen
-                        fs.writeFileSync(fullComponentPath, `<template>\n${componentContent}\n</template>`, 'utf8');
+                        let newContent = `<template>\n${componentContent}\n</template>`;
+                        if (cssContent) {
+                            newContent += `\n<style scoped>\n${cssContent}\n</style>`;
+                        }
+                        fs.writeFileSync(fullComponentPath, newContent, 'utf8');
                         console.log(`Created new component: ${fullComponentPath}`);
+                    }
+
+                    // CSS-Datei zur Liste der verwendeten Assets hinzufügen
+                    if (usedCssPath) {
+                        usedAssets.push(usedCssPath);
                     }
                 }
             }
@@ -125,27 +184,69 @@ function extractVueComponents(htmlDir, targetDir) {
     });
 }
 
-// Hauptfunktion
+
+// Funktion zum Löschen der ausgeschlossenen Assets im Zielverzeichnis
+function deleteExcludedAssets(dir, exclude) {
+    fs.readdirSync(dir).forEach(file => {
+        const filePath = path.join(dir, file);
+        if (fs.lstatSync(filePath).isFile() && exclude.includes(filePath)) {
+            fs.unlinkSync(filePath);
+            console.log(`Deleted excluded file: ${filePath}`);
+        } else if (fs.lstatSync(filePath).isDirectory()) {
+            deleteExcludedAssets(filePath, exclude);
+        }
+    });
+}
+
 function main() {
-    // Kopieren des assets-Ordners
-    if (fs.existsSync(sourceDir)) {
-        copyFolderSync(sourceDir, destDir);
-    } else {
-        console.log(`${sourceDir} does not exist.`);
-    }
-
-    // Aktualisieren der nuxt.config.ts
-    if (fs.existsSync(nuxtConfigPath)) {
-        updateNuxtConfig(nuxtConfigPath);
-    } else {
-        console.log(`${nuxtConfigPath} does not exist.`);
-    }
-
     // Extrahieren von Vue-Komponenten aus HTML-Dateien
     if (fs.existsSync(exportDir)) {
         extractVueComponents(exportDir, componentsDir);
     } else {
         console.log(`${exportDir} does not exist.`);
+    }
+
+    // Kopieren des assets-Ordners
+    const bootstrapAssetsDir = path.join(exportDir, '..', 'autisten-info-bootstrap', 'assets');
+    if (fs.existsSync(bootstrapAssetsDir)) {
+        copyFolderSync(bootstrapAssetsDir, destDir);
+        console.log("Copying assets completed.");
+
+        // Konvertieren der Pfade in usedAssets in die Zielverzeichnisstruktur
+        const adjustedUsedAssets = usedAssets.map(assetPath => {
+            return assetPath.replace(
+                path.join(exportDir, '..', 'autisten-info-bootstrap', 'assets'),
+                destDir
+            );
+        });
+
+        // Löschen der ausgeschlossenen Assets im Zielverzeichnis
+        console.log(adjustedUsedAssets);
+        deleteExcludedAssets(destDir, adjustedUsedAssets);
+    } else {
+        console.log(`${bootstrapAssetsDir} does not exist.`);
+    }
+
+    // Verbleibende CSS-Dateien zur Nuxt-Konfiguration hinzufügen
+    const remainingCssFiles = [];
+    function collectRemainingCss(dir) {
+        fs.readdirSync(dir).forEach(file => {
+            const filePath = path.join(dir, file);
+            if (fs.lstatSync(filePath).isFile() && filePath.endsWith('.css') && !usedAssets.includes(filePath)) {
+                remainingCssFiles.push(`@/assets/${path.relative(destDir, filePath).replace(/\\/g, '/')}`);
+            } else if (fs.lstatSync(filePath).isDirectory()) {
+                collectRemainingCss(filePath);
+            }
+        });
+    }
+    collectRemainingCss(destDir);
+
+    if
+
+ (fs.existsSync(nuxtConfigPath)) {
+        updateNuxtConfig(nuxtConfigPath, remainingCssFiles);
+    } else {
+        console.log(`${nuxtConfigPath} does not exist.`);
     }
 }
 

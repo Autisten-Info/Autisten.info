@@ -5,6 +5,7 @@
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item"><NuxtLink class="nav-link active" to="/">Startseite</NuxtLink></li>
                     <li class="nav-item"><NuxtLink class="nav-link active" to="/about">Über Uns</NuxtLink></li>
+                    <li class="nav-item"><NuxtLink class="nav-link active" to="/blog">Blog</NuxtLink></li>
                 </ul>
                 <div class="d-md-none my-2"><button class="btn btn-light me-2" type="button">Button</button><button class="btn btn-primary" type="button">Button</button></div>
             </div>
@@ -12,11 +13,8 @@
         </div>
     </nav>
 </template>
-<script setup>
-import { ref, onMounted } from 'vue'
+
+<script setup="">
+import { ref } from 'vue'
 const Test = ref('Test')
-onMounted(() => {
-    console.log('AppNavbar mounted')
-    Test.value = 'Hallo Welt from Vue'
-})
 </script>
